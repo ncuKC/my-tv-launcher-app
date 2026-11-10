@@ -1,0 +1,75 @@
+name: Build and release
+'on':
+  push:
+    branches: [main]
+  workflow_dispatch:
+    inputs:
+      publish:
+        description: Publish signed APK to GitHub Releases
+        type: boolean
+        default: false
+permissions:
+  contents: read
+jobs:
+  build:
+    runs-on: ubuntu-latest
+    timeout-minutes: 20
+    permissions:
+      contents: write
+    env:
+      PUBLISH: ${{ github.event_name == 'workflow_dispatch' && inputs.publish }}
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-java@v5
+        with:
+          distribution: temurin
+          java-version: '17'
+      - uses: android-actions/setup-android@v4
+      - uses: gradle/actions/setup-gradle@v4
+        with:
+          gradle-version: '8.9'
+      - name: Install SDK
+        run: sdkmanager "platforms;android-35" "build-tools;35.0.0"
+      - name: Build test APK
+        if: env.PUBLISH != 'true'
+        run: gradle --no-daemon assembleDebug
+      - name: Build signed release
+        if: env.PUBLISH == 'true'
+        env:
+          KEYSTORE_BASE64: ${{ secrets.KEYSTORE_BASE64 }}
+          KEYSTORE_PASSWORD: ${{ secrets.KEYSTORE_PASSWORD }}
+        run: |
+          set -euo pipefail
+          test -n "$KEYSTORE_BASE64" || { echo "Add KEYSTORE_BASE64 secret first"; exit 1; }
+          test -n "$KEYSTORE_PASSWORD" || { echo "Add KEYSTORE_PASSWORD secret first"; exit 1; }
+          trap 'rm -f release.p12' EXIT
+          printf '%s' "$KEYSTORE_BASE64" | base64 --decode > release.p12
+          chmod 600 release.p12
+          gradle --no-daemon assembleRelease
+      - name: Verify and collect
+        run: |
+          set -euo pipefail
+          mkdir -p deliverables
+          if [ "$PUBLISH" = true ]; then
+            cp app/build/outputs/apk/release/app-release.apk deliverables/My-TV.apk
+          else
+            cp app/build/outputs/apk/debug/app-debug.apk deliverables/My-TV-test.apk
+          fi
+          APK=$(find deliverables -name '*.apk' -print -quit)
+          "$ANDROID_HOME/build-tools/35.0.0/apksigner" verify --verbose "$APK"
+          "$ANDROID_HOME/build-tools/35.0.0/aapt2" dump badging "$APK" | tee deliverables/APK-check.txt
+          sha256sum "$APK" > deliverables/SHA256SUMS.txt
+      - uses: actions/upload-artifact@v4
+        with:
+          name: My-TV-APK
+          path: deliverables/*
+          retention-days: 3
+      - name: Publish release
+        if: env.PUBLISH == 'true'
+        env:
+          GH_TOKEN: ${{ github.token }}
+        run: |
+          set -euo pipefail
+          VERSION=$(sed -n "s/.*versionName '\([^']*\)'.*/\1/p" app/build.gradle)
+          test -n "$VERSION"
+          gh release create "v$VERSION" deliverables/My-TV.apk deliverables/SHA256SUMS.txt --target "$GITHUB_SHA" --title "Мой ТВ $VERSION" --notes "Лаунчер, пейзажи с резервными часами и обновления из GitHub. Работа на устройстве требует проверки."
