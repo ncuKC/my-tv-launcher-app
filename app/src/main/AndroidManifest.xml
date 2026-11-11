@@ -14,6 +14,7 @@
    <intent-filter><action android:name="android.intent.action.MAIN"/><category android:name="android.intent.category.HOME"/><category android:name="android.intent.category.DEFAULT"/></intent-filter>
   </activity>
   <activity android:name=".MainActivity$Saver" android:screenOrientation="landscape" android:exported="false"/>
+  <activity android:name=".PreviewActivity" android:screenOrientation="landscape" android:exported="false"/>
   <activity android:name=".UpdateResult" android:exported="false"/>
   <activity-alias android:name=".Updates$Result" android:targetActivity=".UpdateResult" android:exported="false"/>
   <service android:name=".MainActivity$Dream" android:label="Мой ТВ — Пейзажи" android:icon="@drawable/icon" android:permission="android.permission.BIND_DREAM_SERVICE" android:exported="true">

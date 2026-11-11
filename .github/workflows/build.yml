@@ -71,4 +71,4 @@ jobs:
           set -euo pipefail
           VERSION=$(sed -n "s/.*versionName '\([^']*\)'.*/\1/p" app/build.gradle)
           test -n "$VERSION"
-          gh release create "v$VERSION" deliverables/My-TV.apk deliverables/SHA256SUMS.txt --target "$GITHUB_SHA" --title "Мой ТВ $VERSION" --notes "Исправлены прозрачность пейзажей и положение часов; кнопки без перекрытия; автоматическая проверка обновлений со значком; RAM и CPU с явным обозначением источника. Проверка на приставке ещё требуется."
+          gh release create "v$VERSION" deliverables/My-TV.apk deliverables/SHA256SUMS.txt --target "$GITHUB_SHA" --title "Мой ТВ $VERSION" --notes-file CHANGELOG.md

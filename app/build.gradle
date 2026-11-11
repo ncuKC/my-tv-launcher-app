@@ -2,7 +2,7 @@ plugins { id 'com.android.application' }
 android {
  namespace 'ru.mytv.launcher'
  compileSdk 35
- defaultConfig { applicationId 'ru.mytv.launcher'; minSdk 26; targetSdk 35; versionCode 304; versionName '0.3.4' }
+ defaultConfig { applicationId 'ru.mytv.launcher'; minSdk 26; targetSdk 35; versionCode 305; versionName '0.3.5' }
  signingConfigs { release { if (System.getenv('KEYSTORE_PASSWORD')) { storeFile rootProject.file('release.p12'); storePassword System.getenv('KEYSTORE_PASSWORD'); keyAlias 'launcher'; keyPassword System.getenv('KEYSTORE_PASSWORD'); storeType 'PKCS12' } } }
  buildTypes { debug { applicationIdSuffix '.test'; versionNameSuffix '-test' }; release { signingConfig signingConfigs.release; minifyEnabled false } }
  compileOptions { sourceCompatibility JavaVersion.VERSION_17; targetCompatibility JavaVersion.VERSION_17 }
