@@ -37,7 +37,7 @@ Android 8.0+ · Бесплатно · Без рекламы
 
 ### Приложения
 
-<img src="applications-aligned.jpg" alt="Сетка приложений Мой ТВ" width="960">
+<img src="applications-aligned-2.jpg" alt="Сетка приложений Мой ТВ" width="960">
 
 ### Настройки заставки
 
